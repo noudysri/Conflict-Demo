@@ -6,11 +6,7 @@
 # Compiled class file
 *.class
 bin/
-<<<<<<< HEAD
-
-=======
 obj/
->>>>>>> parent of 7a2bd49 (frsfsf)
 # Log file
 *.log
 
