@@ -2,4 +2,3 @@ blue
 green
 red
 while
-pink
