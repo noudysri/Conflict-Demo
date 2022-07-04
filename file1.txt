@@ -1,7 +1,0 @@
-blue
-green
-red
-while
-dev2
-dev3
-dev10
