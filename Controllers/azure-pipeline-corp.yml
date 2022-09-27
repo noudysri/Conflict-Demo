@@ -1,0 +1,26 @@
+trigger:
+  batch: "true"
+  branches:
+     include:
+     - main
+  paths:
+    exclude:
+      - README.md
+      - azure-pipelines.yml
+
+pr:
+  autoCancel: "true"
+  branches:
+     include:
+     - master
+  paths:
+     exclude:
+     - README.md
+
+pool:
+  vmImage: ubuntu-latest
+
+# name: $(TeamProject)_$(Date:yyyyMMdd)$(Rev:.r)
+variables:
+  project_name: "TAF-TEST"
+  pipeline_id: 97
