@@ -26,3 +26,9 @@ steps:
       echo '$(successfulReservedDevices)'
       echo '$(devicesToDeAllocate)'
 
+- task: Bash@3
+  displayName: 'Bash Script'
+  inputs:
+    targetType: filePath
+    filePath: './devicerreservation/deallocate-devices.sh'
+
