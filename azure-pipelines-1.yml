@@ -31,5 +31,5 @@ steps:
   inputs:
     targetType: filePath
     filePath: './devicerreservation/deallocate-devices.sh'
-    arguments: '-${successfulReservedDevices}'
+    arguments: '-$(successfulReservedDevices)'
 
