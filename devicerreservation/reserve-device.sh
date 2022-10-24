@@ -47,3 +47,5 @@ echo count of successfulDevice : $successfulDeviceCount
 # maven call  pass the deviceIDs
 
 echo "##vso[task.setvariable variable=successfulDeviceCount;]$successfulDeviceCount"
+echo "##vso[task.setvariable variable=successfulReservedDevices;]${successfulReservedDevices[@]}"
+echo "##vso[task.setvariable variable=devicesToDeAllocate;]$devicesToDeAllocate"
