@@ -1,4 +1,5 @@
 # read the ReservationID-Array : successfulReservedDevices
+successfulReservedDevices=("$@")
 echo sucessful reserved Devices : ${successfulReservedDevices[@]}
 for key in ${successfulReservedDevices[@]}
 do
