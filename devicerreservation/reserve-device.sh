@@ -45,3 +45,5 @@ devicesToDeAllocate=${devicesToDeAllocate%,}
 echo successful DeviceId : $devicesToDeAllocate
 echo count of successfulDevice : $successfulDeviceCount
 # maven call  pass the deviceIDs
+
+echo "##vso[task.setvariable variable=successfulDeviceCount;]$successfulDeviceCount"
