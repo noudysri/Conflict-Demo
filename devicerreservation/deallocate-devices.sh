@@ -1,5 +1,9 @@
 # read the ReservationID-Array : successfulReservedDevices
+
+echo $0
+
 ${successfulReservedDevices[@]}=$0
+echo sucessful reserved Devices : ${successfulReservedDevices[@]}
 for key in ${successfulReservedDevices[@]}
 do
   #echo reserverid is not empty
