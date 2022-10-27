@@ -32,7 +32,6 @@ pool:
 #     targetType: filePath
 #     filePath: './devicerreservation/deallocate-devices.sh'
 #     arguments: '$(successfulReservedDevices)'
-
 - task: Bash@3
   inputs:
     targetType: 'inline'
