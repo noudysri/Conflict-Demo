@@ -1,0 +1,186 @@
+# Maven
+# Build your Java project and run tests with Apache Maven.
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/java
+
+steps:
+  - task: Cache@2
+    inputs:
+      key: '"onepipeline" | "$(Agent.OS)" | pom.xml'
+      restoreKeys: |
+        "onepipeline" | "$(Agent.OS)" | pom.xml
+        "onepipeline" | "$(Agent.OS)"
+      path: 'C:\Users\VssAdministrator\.m2\repository'
+
+  - task: Bash@3
+    displayName: Create some pipeline variables to be used in later steps
+    inputs:
+      targetType: 'inline'
+      script: |
+        echo "Defininig some date variables"
+        theYear=`date +%Y`
+        theMonth=`date +%m`
+        theDay=`date +%d`
+        theHour=`date +%H`
+        theMinute=`date +%M`
+        echo "---------------------------------"
+        echo "theYear: ${theYear}"
+        echo "theMonth: ${theMonth}"
+        echo "theDay: ${theDay}"
+        echo "theHour: ${theHour}"
+        echo "theMinute: ${theMinute}"
+        echo "---------------------------------"
+        echo "##vso[task.setvariable variable=theYear;]$theYear"
+        echo "##vso[task.setvariable variable=theMonth;]$theMonth"
+        echo "##vso[task.setvariable variable=theDay;]$theDay"
+        echo "##vso[task.setvariable variable=theHour;]$theHour"
+        echo "##vso[task.setvariable variable=theMinute;]$theMinute"        
+  - task: AzureKeyVault@2
+    inputs:
+      azureSubscription: 'sub-venpub-psecom-devv-01-scn-TAF-TEST'
+      KeyVaultName: 'psecom-qe-devv-kv-01'
+      SecretsFilter: 'ecom-azure-config-qe-devv-clientid,ecom-azure-config-qe-devv-clientsecret,ecom-azure-config-qe-devv-tenantid'
+      RunAsPreJob: false
+
+  - task: PowerShell@2
+    displayName: Define client auth as env variable for configuration management
+    inputs:
+      targetType: 'inline'
+      script: |
+        Write-Host "Define client auth for configuration management"
+        Write-Host "##vso[task.setvariable variable=AZURE_CLIENT_ID;]$(ecom-azure-config-qe-devv-clientid)"
+        Write-Host "##vso[task.setvariable variable=AZURE_CLIENT_SECRET;]$(ecom-azure-config-qe-devv-clientsecret)"
+        Write-Host "##vso[task.setvariable variable=AZURE_TENANT_ID;]$(ecom-azure-config-qe-devv-tenantid)"
+        # call the reservation shell script
+  - task: Bash@3
+    displayName: 'Calling Reservation shell script'
+    inputs:
+      targetType: filePath
+      filePath: '../devops/runners/devicerreservation/reserve-device.sh'       
+        # put all the vairable in pipelines parameters/variables
+        
+  - task: Bash@3
+    displayName: 'Executing Maven'
+    inputs:
+      targetType: 'inline'
+      script: |
+        env
+        echo Tags to execute are '{"${{parameters.mavenTags1}}","${{parameters.mavenTags2}}"}'
+        mvn install -PParallel -B -Dmaven.artifact.threads=15 -Dmaven.test.failure.ignore=true "-DparallelScheme=FEATURE" -Dtags={"${{parameters.mavenTags1}}","${{parameters.mavenTags2}}"} "-DcreateChecksum=true" "-DforkCount=${{parameters.forkCount}}" "-DdriverType=${{parameters.driverType}}" "-DAppType=${{parameters.AppType}}" "-Dsd=com/qe/test/stepdefinition/" "-Dffile=src/test/resources/features/${{parameters.sourceFeatureFiles}}" "-Dtargeted.web.browserType=${{parameters.targetBrowserType}}" "-Dtargeted.environment=${{parameters.targetEnvironment}}" "-DcloudLabName=$(cloudLabName)" "-DcloudSecurityToken=$(cloudSecurityToken)" "-DSuccessfulDevices= $(devicesToDeAllocate)"
+        # call deallocate shell script
+        
+  - task: Bash@3
+    displayName: 'Calling deallocate shell script'
+    inputs:
+      targetType: filePath
+      filePath: '../devops/runners/devicerreservation/deallocate-devices.sh'
+      arguments: '$(successfulReservedDevices)'    
+
+  - task: PublishCucumberReport@1
+    condition: always()
+    displayName: 'Publish Cucumber Parallel Report_${{parameters.jobDisplayName}}'
+    inputs:
+      jsonDir: ./target/cucumber-parallel/json
+      outputPath: ./target/cucumber-parallel/html
+      name: '${{parameters.jobDisplayName}}'
+
+  # 1. Zip Cucumber Parallel files
+  - task: ArchiveFiles@2
+    condition: always()
+    displayName: target/cucumber-parallel_${{parameters.jobDisplayName}}
+    inputs:
+      rootFolderOrFile: ./target/cucumber-parallel
+      archiveFile: $(Build.ArtifactStagingDirectory)/Cucumber-Parallel_${{parameters.jobDisplayName}}.zip
+
+  # Save the Cucumber Report files as artifact
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: Cucumber Parallel ${{parameters.jobDisplayName}}'
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/Cucumber-Parallel_${{parameters.jobDisplayName}}.zip
+      ArtifactName: Cucumber-Parallel_${{parameters.jobDisplayName}}
+
+  # 2. Zip AXEViolations files
+  - bash: |
+      count=$(find ./target/Report/AXEViolations/ -maxdepth 1 -type f|wc -l)
+      echo Total Number of files created = $count
+      echo "========================== List of files ==========================="
+      
+      find ./target/Report/AXEViolations/ -type f -printf "%f\n"
+      for file in ./target/Report/AXEViolations/*; do
+       echo "${file##*/}"
+      done
+      
+      echo "====================================================================" 
+       if [[ count -gt 0 ]]; then
+           echo "entered into if block"
+           echo "##vso[task.setVariable variable=FILEEXISTS]true"
+       fi
+    condition: always()
+  - task: ArchiveFiles@2
+    displayName: target/AXE-Violations_${{parameters.jobDisplayName}}
+    inputs:
+      rootFolderOrFile: ./target/Report/AXEViolations
+      archiveFile: $(Build.ArtifactStagingDirectory)/AXE-Violations_${{parameters.jobDisplayName}}.zip
+    #continueOnError: true
+    #condition: eq(variables['FileExists'], True)
+    condition: eq(variables.FILEEXISTS, 'true')
+
+  # Save the AXEViolations files as artifact
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: AXEViolations ${{parameters.jobDisplayName}}'
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/AXE-Violations_${{parameters.jobDisplayName}}.zip
+      ArtifactName: AXE-Violations_${{parameters.jobDisplayName}}
+    condition: eq(variables.FILEEXISTS, 'true')
+
+  # 3. Zip Cucumber Report files
+  - task: ArchiveFiles@2
+    displayName: target/feature-overview-reports_${{parameters.jobDisplayName}}
+    inputs:
+      rootFolderOrFile: ./target/cucumber-reports/cucumber-html-reports
+      archiveFile: $(Build.ArtifactStagingDirectory)/Feature-Overview_${{parameters.jobDisplayName}}.zip
+
+  # Save the Cucumber Report files as artifact
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: Feature Overview Reports_${{parameters.jobDisplayName}}'
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/Feature-Overview_${{parameters.jobDisplayName}}.zip
+      ArtifactName: Feature-Overview_${{parameters.jobDisplayName}}
+
+  # 4. Framework Logs
+  - task: ArchiveFiles@2
+    condition: eq(${{ parameters.logs }}, 1)
+    displayName: Frameworklogs_${{parameters.jobDisplayName}}
+    inputs:
+      rootFolderOrFile: ./target/logs
+      archiveFile: $(Build.ArtifactStagingDirectory)/Framework-Logs_${{parameters.jobDisplayName}}.zip
+
+  # Save the Cucumber Report files as artifact
+  - task: PublishBuildArtifacts@1
+    condition: eq(${{ parameters.logs }}, 1)
+    displayName: 'Publish Artifact: Framework Logs_${{parameters.jobDisplayName}}'
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/Framework-Logs_${{parameters.jobDisplayName}}.zip
+      ArtifactName: Framework-Logs_${{parameters.jobDisplayName}}
+
+  # 4. Publishing to Azure FileShare
+  # CLI Documentation: https://docs.microsoft.com/en-us/cli/azure/storage/file?view=azure-cli-latest
+  # multiline inline script generated an issue, hence the format is done as single line
+  - task: AzureCLI@1
+    displayName: Upload Cucumber Reports to Dashboard storage
+    continueOnError: true
+    inputs:
+      azureSubscription: sub-venpub-psecom-devv-01-scn-TAF-TEST
+      scriptLocation: inlineScript
+      inlineScript: |
+        az storage file upload-batch --source "./target/cucumber-parallel/html/" --destination-path "${{parameters.jobDisplayName}}/${{parameters.targetEnvironment}}/$(theYear)/$(theMonth)/$(theDay)/$(theHour)-$(theMinute)/cucumber/" --destination qe-reports-share --account-name "psecomdevvqualityreports" --pattern "*"
+  # multiline inline script generated an issue, hence the format is done as single line
+  - task: AzureCLI@1
+    displayName: Upload Axe Reports to Dashboard storage
+    condition: eq(variables.FILEEXISTS, 'true')
+    continueOnError: true
+    inputs:
+      azureSubscription: sub-venpub-psecom-devv-01-scn-TAF-TEST
+      scriptLocation: inlineScript
+      inlineScript: |
+        az storage file upload-batch --source "./target/Report/AXEViolations/" --destination-path "${{parameters.jobDisplayName}}/${{parameters.targetEnvironment}}/$(theYear)/$(theMonth)/$(theDay)/$(theHour)-$(theMinute)/AXEViolations/" --destination qe-reports-share --account-name "psecomdevvqualityreports" --pattern "*"
