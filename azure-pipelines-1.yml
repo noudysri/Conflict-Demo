@@ -32,10 +32,10 @@ pool:
 #     targetType: filePath
 #     filePath: './devicerreservation/deallocate-devices.sh'
 #     arguments: '$(successfulReservedDevices)'
-- task: Bash@3
-  inputs:
-    targetType: 'inline'
-    script: |
+ - task: Bash@3
+   inputs:
+     targetType: 'inline'
+     script: |
       # Write your commands here
       
       #!/bin/bash
@@ -90,10 +90,10 @@ pool:
       echo "##vso[task.setvariable variable=successfulReservedDevices;]${successfulReservedDevices[@]}"
       echo "##vso[task.setvariable variable=devicesToDeAllocate;]$devicesToDeAllocate"
 
-- task: Bash@3
-  inputs:
-    targetType: 'inline'
-    script: |
+ - task: Bash@3
+   inputs:
+     targetType: 'inline'
+     script: |
       # Write your commands here
        # read the ReservationID-Array : successfulReservedDevices
       successfulReservedDevices=("$@")
