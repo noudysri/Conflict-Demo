@@ -11,6 +11,9 @@ variables:
 - name: display my name
   value: $(variables.name)
 
+steps:
+- script: echo $(name)
+
 parameters: 
   - name: certificatename
     displayName: create certificate 
@@ -38,9 +41,9 @@ stages:
             echo ${{parameters.Environment}}
             echo ${{parameters.certificatename}}
             echo 'Hello world'
-    - job: Display my name
-      steps:
-      - script: echo $(name)
+    # - job: Display my name
+    #   steps:
+    #   - script: echo $(name)
 
 
 
