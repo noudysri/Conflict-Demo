@@ -15,7 +15,8 @@
       - "uat"
       - "pre-prod"
       - "prod"
-
+stages: 
+  -stage:
   - task: Bash@3
     inputs:
       targetType: 'inline'
