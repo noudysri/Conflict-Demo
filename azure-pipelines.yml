@@ -9,6 +9,7 @@ pr: none
 variables:
 - group: Dev-varaible-Group
 - name: display my name
+  value: $(variables.name)
 
 parameters: 
   - name: certificatename
