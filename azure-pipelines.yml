@@ -4,7 +4,7 @@
  parameters: 
    - name: certificatename
      displayName: create certificate 
-     type: boole
+     type: boolean
      default: false
 
    - name: Environment
