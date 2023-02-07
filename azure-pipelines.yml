@@ -6,13 +6,11 @@ trigger:
       - feature/*
 pr: none
 
-variables:
+variable:
 - group: Dev-varaible-Group
-- name: display my name
-  value: $(variables.name)
 
 # steps:
-# - script: echo $(name)
+# - script: echo $(myname)
 
 parameters: 
   - name: certificatename
@@ -41,8 +39,8 @@ stages:
             echo ${{parameters.Environment}}
             echo ${{parameters.certificatename}}
             echo 'Hello world'
-    #- job: Display my name
-      - task:
+    - job: Display
+      steps:
       - script: echo $(myname)
 
 
