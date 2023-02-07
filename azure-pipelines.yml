@@ -16,7 +16,7 @@ parameters:
   - name: certificatename
     displayName: create certificate 
     type: boolean
-    default: false
+    default: true
 
   - name: Environment
     displayName: select the environment
