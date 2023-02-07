@@ -41,8 +41,8 @@ stages:
             echo ${{parameters.Environment}}
             echo ${{parameters.certificatename}}
             echo 'Hello world'
-    # - job: Display my name
-      steps:
+    #- job: Display my name
+      - task:
       - script: echo $(myname)
 
 
