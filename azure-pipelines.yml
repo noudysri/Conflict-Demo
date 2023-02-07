@@ -28,20 +28,19 @@ parameters:
       - "uat"
       - "pre-prod"
       - "prod"      
-      
 stages:
-  - stage: First
-    jobs:  
-      - job: Deploy
-        steps:
-        - task: Bash@3
-          inputs:
-            targetType: 'inline'
-            script: |
-              # Write your commands here
-              echo ${{parameters.Environment}}
-              echo ${{parameters.certificatename}}
-              echo 'Hello world'
+- stage: First
+  jobs:  
+    - job: Deploy
+      steps:
+      - task: Bash@3
+        inputs:
+          targetType: 'inline'
+          script: |
+            # Write your commands here
+            echo ${{parameters.Environment}}
+            echo ${{parameters.certificatename}}
+            echo 'Hello world'
     # - job: Display my name
     #   steps:
     #   - script: echo $(name)
