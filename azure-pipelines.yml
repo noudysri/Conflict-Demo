@@ -4,7 +4,7 @@
  parameters: 
    - name: certificatename
      displayName: create certificate 
-     type: boolenan
+     type: boolean
      default: false
 
    -name: Environment
@@ -15,7 +15,7 @@
       - "uat"
       - "pre-prod"
       - "prod"
-      
+
 - task: Bash@3
   inputs:
     targetType: 'inline'
