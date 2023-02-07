@@ -31,7 +31,8 @@ stages:
           targetType: 'inline'
           script: |
             # Write your commands here
-            
+            echo ${{parameters.Environment}}
+            echo ${{parameters.certificatename}}
             echo 'Hello world'
 
 
