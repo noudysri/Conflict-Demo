@@ -8,7 +8,7 @@ pr: none
 
 variables:
 - group: Dev-varaible-Group
-  name: display my name
+- name: display my name
 
 parameters: 
   - name: certificatename
