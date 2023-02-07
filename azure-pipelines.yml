@@ -6,6 +6,10 @@ trigger:
       - feature/*
 pr: none
 
+variables:
+- group: Dev-varaible-Group
+  name: display my name
+
 parameters: 
   - name: certificatename
     displayName: create certificate 
@@ -19,8 +23,7 @@ parameters:
     values:
       - "uat"
       - "pre-prod"
-      - "prod"
-
+      - "prod"      
 stages:
 - stage: First
   jobs:  
@@ -34,6 +37,10 @@ stages:
             echo ${{parameters.Environment}}
             echo ${{parameters.certificatename}}
             echo 'Hello world'
+    - job: Display my name
+      steps:
+      - script: echo $(name)
+
 
 
 
