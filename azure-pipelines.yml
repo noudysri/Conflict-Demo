@@ -4,10 +4,10 @@
  parameters: 
    - name: certificatename
      displayName: create certificate 
-     type: boolean
+     type: boole
      default: false
 
-   -name: Environment
+   - name: Environment
     displayName: select the environment
     type: string
     default: 'dev' 
