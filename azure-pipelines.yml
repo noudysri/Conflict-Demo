@@ -1,12 +1,28 @@
-# Node.js
-# Build a general Node.js project with npm.
-# Add steps that analyze code, save build artifacts, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
+ trigger:
+ pr: none
 
-trigger:
-- main
+ parameters: 
+   - name: certificatename
+     displayName: create certificate 
+     type: boolenan
+     default: false
 
-pool:
-  vmImage: ubuntu-latest
+   -name: Environment
+    displayName: select the environment
+    type: string
+    default: 'dev' 
+    values:
+      - "uat"
+      - "pre-prod"
+      - "prod"
+      
+- task: Bash@3
+  inputs:
+    targetType: 'inline'
+    script: |
+      # Write your commands here
+      
+      echo 'Hello world'
+  
 
 
