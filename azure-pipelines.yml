@@ -8,10 +8,10 @@
      default: false
 
    - name: Environment
-    displayName: select the environment
-    type: string
-    default: 'dev' 
-    values:
+     displayName: select the environment
+     type: string
+     default: 'dev' 
+     values:
       - "uat"
       - "pre-prod"
       - "prod"
