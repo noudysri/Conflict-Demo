@@ -15,8 +15,7 @@ parameters:
     displayName: Certificate_ASDA 
     type: boolean
     default: false
-
-parameters: 
+ 
   - name: certificatename
     displayName: create certificate 
     type: boolean
